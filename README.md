@@ -26,13 +26,11 @@ Slides will be posted after class. Use these resources to recap over what has be
 ## Week 1: Intro to `R`.
 
 1. An introduction to R.
-1. Project and package management.
-1. Markdown files and knitting. 
-1. Revisiting OLS. 
+2. Project management.
+3. Markdown files and knitting. 
+4. How to use Tex language for writing in markdown. 
 
 **Content:**
-[.html]() |
-[.Rmd]()
 
 ## Week 2: Data wrangling using `tidyverse`
 
