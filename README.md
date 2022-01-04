@@ -52,5 +52,8 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 ## Week 10: Heteroskedasticity and Autocorrelation
 
-**Thanks**
+
+
+### Thanks
+
 I would like to thank [Philip](https://philip-economides.com/) for assistance in setting up this course site and for providing some of the slide content. 
