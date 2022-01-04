@@ -15,7 +15,7 @@ Prerequisite Installations:
 
 Recomended Installations:
 
--[LaTeX distribution software](https://www.latex-project.org/get/#tex-distributions), I use MiKTeX.
+- [LaTeX distribution software](https://www.latex-project.org/get/#tex-distributions), I use MiKTeX.
 
 ## Lab Slides
 
