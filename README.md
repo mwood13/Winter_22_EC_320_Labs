@@ -1,5 +1,7 @@
 # Intro To Econometrics Labs
 
+This lab is taught in conjunction with [EC 320](https://github.com/peconomi/EC320_Econometrics) taught by [Philip Economides](https://philip-economides.com/)
+
 **Lab Session**: 
 - Thursdays 4:00pm–5:20pm, Mackenzie Hall 422
 
@@ -49,3 +51,6 @@ Slides will be posted after class. Use these resources to recap over what has be
 ## Week 9: Interaction Terms and Non-Linear Relationships
 
 ## Week 10: Heteroskedasticity and Autocorrelation
+
+**Thanks**
+I would like to thank [Philip](https://philip-economides.com/) for assistance in setting up this course site and for providing some of the slide content. 
