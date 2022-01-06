@@ -32,6 +32,8 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content:**
 
+[.html](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week-1.html) |
+
 ## Week 2: Data wrangling using `tidyverse`
 
 ## Week 3: Visualization using `ggplot2`
