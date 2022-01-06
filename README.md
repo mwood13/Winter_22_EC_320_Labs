@@ -32,8 +32,9 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content:**
 
-[.PDF]([Week 1 Lab.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7824028/Week.1.Lab.pdf)
-) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%201.Rmd)
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7824036/Week.1.Lab.pdf)
+
+ | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%201.Rmd)
 
 ## Week 2: Data wrangling using `tidyverse`
 
