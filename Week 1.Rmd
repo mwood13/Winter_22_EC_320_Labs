@@ -1,0 +1,433 @@
+---
+title: "Week 1 Lab"
+subtitle: "Intro to R and R Studio"
+author: "Micaela Wood"
+date: "01/06/2022"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{R, setup, include = F}
+# devtools::install_github("dill/emoGG")
+library(pacman)
+p_load(
+  broom, tidyverse,
+  latex2exp, ggplot2, ggthemes, ggforce, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor,
+  data.table, dplyr, estimatr,
+  lubridate, knitr, parallel,
+  lfe,
+  here, magrittr
+)
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+slate <- "#314f4f"
+# Dark slate grey: #314f4f
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+options(crayon.enabled = F)
+options(knitr.table.format = "html")
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 18, family = "STIXGeneral"),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_void() + theme(
+  text = element_text(family = "Fira Sans Book"),
+  axis.title = element_text(size = 18),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = grey_light,
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_set(theme_gray(base_size = 20))
+# Column names for regression results
+reg_columns <- c("Term", "Est.", "S.E.", "t stat.", "p-Value")
+# Function for formatting p values
+format_pvi <- function(pv) {
+  return(ifelse(
+    pv < 0.0001,
+    "<0.0001",
+    round(pv, 4) %>% format(scientific = F)
+  ))
+}
+format_pv <- function(pvs) lapply(X = pvs, FUN = format_pvi) %>% unlist()
+# Tidy regression results table
+tidy_table <- function(x, terms, highlight_row = 1, highlight_color = "black", highlight_bold = T, digits = c(NA, 3, 3, 2, 5), title = NULL) {
+  x %>%
+    tidy() %>%
+    select(1:5) %>%
+    mutate(
+      term = terms,
+      p.value = p.value %>% format_pv()
+    ) %>%
+    kable(
+      col.names = reg_columns,
+      escape = F,
+      digits = digits,
+      caption = title
+    ) %>%
+    kable_styling(font_size = 20) %>%
+    row_spec(1:nrow(tidy(x)), background = "white") %>%
+    row_spec(highlight_row, bold = highlight_bold, color = highlight_color)
+}
+```
+
+```{css, echo = F, eval = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+
+
+#About Me
+
+* Second year Economics PhD student
+
+* Fields are environmental and behavioral economics
+
+* Current research focuses on natural disasters and agriculture
+
+
+---
+
+#Contact Info
+
+* Office Hours: Fridays 2:00-3:00pm or by appointment
+
+* Office: Prince Lucien Campbell 827
+
+* email: mwood13@uoregon.edu
+
+---
+
+#Goals for the Labs
+
+* Learn basic CS skills needed to be an econemetrician
+
+* Gain a toolset that can be used after graduation
+
+* Get information in order to complete homework sets
+
+---
+
+# Goals for Today
+
+1. Open a Project in .mono[R] and understand the environment
+
+2. Use **.blue[.mono[R] Script]** for coding and mathematics
+
+3. Use **.red[.mono[R] Markdown]** to make a PDF with embedded code (Great for doing homework and data projects!)
+
+4. If time, learn about packages and other features of .mono[R]
+
+---
+
+# What is a Project?
+
+* Creates a Folder on your computer to store files, data, images, and other items.
+
+* Allows you to easily access files with little code
+  * Uploading data when file is in a Project :
+  - `data <- read_excel("sw_1989_data.xls")`
+  
+* Can be very tedious without a project 
+  * Uploading data without a project:
+  - ` data <- read_excel("C:\\Users\\mdwoo\\Documents\\Oregon\\Year 2\\Time Series\\Problem Set 8 and 9\\sw_1989_data.xls")`
+  
+---
+
+# Steps to open a project
+
+1. Open .mono[R] Studio on your computer
+2. Click on the "File" tab and select "New Project"
+3. In the popup window select "New Directory" -> "New Project"
+4. On the "New Project" Page name your project, choose a location to store it, and then click "Create Project"
+
+---
+
+# The Environment of .mono[R]
+
+###Console: 
+  * Place where you can type code but doesn't save it. 
+  * Automatically runs if you press enter.
+  * Errors from .blue[Script] and chunks in .red[Markdown] will show here
+  
+--
+
+###Render:
+  * Shows errors from knitting
+
+--
+
+###Environment:
+  * Shows any object that has been saved: data, values, and functions
+  
+  
+---
+
+# The Environment of .mono[R]
+
+###Files:
+  * Shows files on your computer
+  * When in a project shows project directory
+  * Can import data from here
+  
+--
+
+###Plots:
+  * Shows any plots you have generated in the console
+  
+--
+
+###Help
+  * Can search different function
+  * Function must be in a package that is installed
+  
+---
+
+#Using .mono[R] Script
+
+* A Script allows you to write and store code to be used at any time. 
+
+* In a script you can:
+  * Create object such as vectors and matrices
+  * Solve math problems
+  * Clean Data 
+  * Run Regressions
+  * Plot graphs
+  
+* To open a new script click "File" -> "New File" -> "R Script"
+
+---
+
+#Using .mono[R] Script
+
+## Vectors and Index
+
+Create a vector, a single row of 7 observations.
+
+```{R, Vector_Time}
+world.pop <- c(2525779,3026003,3691173,4449049,5320817,6127700,6916183)
+world.pop
+```
+
+Combine two vectors into a single row of 7 observations.
+
+```{R, Vector_Time2}
+pop.first <- c(2525779,3026003,3691173,4449049)
+pop.second <- c(5320817,6127700,6916183)
+pop.all <- c(pop.first, pop.second)
+pop.all
+```
+
+---
+#Using .mono[R] Script
+## Vectors and Index
+
+```{R, Get 2nd Element}
+world.pop[2]
+world.pop[c(2,4)]
+world.pop_aug <- world.pop[-3]
+world.pop_aug
+```
+
+---
+#Using .mono[R] Script
+
+## Summary Statistics
+
+.pull-left[
+```{R Summ Stat}
+length(world.pop)
+min(world.pop)
+max(world.pop)
+range(world.pop)
+```
+]
+--
+.pull-right[
+```{R Summ Stat_2}
+mean(world.pop)
+sum(world.pop)/length(world.pop)
+sd(world.pop)
+```
+]
+
+---
+
+#Using .mono[R] Markdown
+
+* Markdown allows you to have text along with your code
+
+* Will be helpful for completing your future homework and data project
+
+* Code must be written in a "chunk" for it to run
+
+* You can choose if your code is seen in the final document
+
+* Easy way to create PDF and HTML files (For PDF you need to have LaTex installed)
+
+---
+
+#Starting a new .mono[R] Markdown
+
+* To open a Markdown file click "File" -> "New File" -> "R Markdown"
+
+* Edit the Title. This can be changed later so no worries.
+
+* HTML should be selected already. For this class leave it there and then click "OK"
+
+* From here you can either begin typing, or insert a chunk for code. 
+
+* To insert a chunk you can:
+  * click "Code" -> "Insert Chunk"
+  * Click the icon of a Green box with a C and select R
+
+---
+
+#Knitting a Markdown File
+
+* To compile the markdown file into HTML you will click the Knit button
+
+* If you have any errors in your code it will not knit
+
+* Personal advice: knit periodically while doing homework and not at the end
+
+* If you have trouble with this please come by my office or send me an email and I can troubleshoot your code
+
+
+---
+
+#How to type equations in .mono[R]
+
+* To type equations in .mono[R] you will use LaTex code (you do not need it installed)
+
+* Example Equations:
+  * $\sum_{i=1}^n x_i =30$ -> `\sum_{i=1}^n x_i =30`
+  * $E(X^2)$ -> `E(X^2)`
+  * $Cov(X,Y) = E[(X - \mu_x)(Y - \mu_y)]$ -> `Cov(X,Y) = E[(X - \mu_x)(Y - \mu_y)]`
+
+---
+
+#How to type equations in .mono[R]
+
+* For an equation to show in line put $ on both sides
+* For an equation to show on its own line put $$ on both sides
+* If you want to put multiple equations you will need to use the "aligned" environment
+
+$$
+\begin{aligned}
+y &= mx + b \\
+a^2 + b^2 &= c^2 \\
+4 & = 2 + 2
+\end{aligned}
+$$
+
+
+
+```{}
+$$
+\begin{aligned}
+y &= mx + b \\
+a^2 + b^2 &= c^2 \\
+4 & = 2 + 2
+\end{aligned}
+$$
+```
+
+
+---
+
+#Links for Learning R and Latex Code
+
+* [R Markdown Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/) 
+
+* [Markdown Basics](https://rmarkdown.rstudio.com/authoring_basics.html)
+
+* [Latex Mathematical Symbols](https://oeis.org/wiki/List_of_LaTeX_mathematical_symbols#Set_and.2For_logic_notation)
+
+---
+
+class: inverse, middle, center
+
+#Questions?
+
