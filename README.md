@@ -32,7 +32,7 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content:**
 
-[.html](https://raw.githack.com//mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week-1.html) |
+[.html](https://raw.githack.com//mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week-1.html) | [.Rmd](Slides/Week 1.Rmd)
 
 ## Week 2: Data wrangling using `tidyverse`
 
