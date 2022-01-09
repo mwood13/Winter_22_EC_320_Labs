@@ -43,8 +43,9 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content:**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) |
-This weeks slides are cortesy of Philip
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%202.Rmd)
+
+This weeks slides are courtesy of Philip
 
 
 ## Week 3: Visualization using `ggplot2`
