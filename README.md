@@ -36,6 +36,17 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 ## Week 2: Data wrangling using `tidyverse`
 
+1. Installing Packages
+2. Laoding data with `readr`
+3. Cleaning data with `tidyr`
+4. Manipulating data with `dplyr`
+
+**Content:**
+
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) |
+This weeks slides are cortesy of Philip
+
+
 ## Week 3: Visualization using `ggplot2`
 
 ## Week 4: Regression Analysis & Hypothesis Testing
