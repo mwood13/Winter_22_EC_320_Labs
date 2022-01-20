@@ -50,6 +50,11 @@ This weeks slides are courtesy of Philip
 
 ## Week 3: Visualization using `ggplot2`
 
+**Content:**
+
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) | 
+
+
 ## Week 4: Regression Analysis & Hypothesis Testing
 
 ## Week 5: No Lab
