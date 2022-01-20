@@ -1,0 +1,504 @@
+---
+title: "Week 3 Lab"
+subtitle: "Visualization Using ggplot2"
+author: "Micaela Wood"
+date: "01/20/2022"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{R, setup, include = F}
+# devtools::install_github("dill/emoGG")
+library(pacman)
+p_load(
+  broom, tidyverse,
+  latex2exp, ggplot2, ggthemes, ggforce, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor,
+  data.table, dplyr, estimatr,
+  lubridate, knitr, parallel,
+  lfe,
+  here, magrittr
+)
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+slate <- "#314f4f"
+# Dark slate grey: #314f4f
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+options(crayon.enabled = F)
+options(knitr.table.format = "html")
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 18, family = "STIXGeneral"),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_void() + theme(
+  text = element_text(family = "Fira Sans Book"),
+  axis.title = element_text(size = 18),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = grey_light,
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_set(theme_gray(base_size = 20))
+# Column names for regression results
+reg_columns <- c("Term", "Est.", "S.E.", "t stat.", "p-Value")
+# Function for formatting p values
+format_pvi <- function(pv) {
+  return(ifelse(
+    pv < 0.0001,
+    "<0.0001",
+    round(pv, 4) %>% format(scientific = F)
+  ))
+}
+format_pv <- function(pvs) lapply(X = pvs, FUN = format_pvi) %>% unlist()
+# Tidy regression results table
+tidy_table <- function(x, terms, highlight_row = 1, highlight_color = "black", highlight_bold = T, digits = c(NA, 3, 3, 2, 5), title = NULL) {
+  x %>%
+    tidy() %>%
+    select(1:5) %>%
+    mutate(
+      term = terms,
+      p.value = p.value %>% format_pv()
+    ) %>%
+    kable(
+      col.names = reg_columns,
+      escape = F,
+      digits = digits,
+      caption = title
+    ) %>%
+    kable_styling(font_size = 20) %>%
+    row_spec(1:nrow(tidy(x)), background = "white") %>%
+    row_spec(highlight_row, bold = highlight_bold, color = highlight_color)
+}
+```
+
+```{css, echo = F, eval = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+
+#ggplot2
+
+* Today we will learn how to present data visually with `ggplot2`
+
+* This comes with the `tidyverse` package so you can install it in one of two ways
+
+```{}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+or
+
+```{}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+---
+
+#Notes about ggplot2
+
+* Data needs to be in a data frame. 
+
+* To change data into a data frame use `new data <- as.data.frame(old data)` or use `new data <- as_tibble(old data)`
+
+* First, we will start with a small data frame
+
+```{r}
+data <- tribble(
+  ~"A", ~"B", ~"C", ~"D",
+  #---|-----|-----|-----
+  2, 3, 4, "b",
+  1, 2, 1, "b",
+  4, 5, 15, "a",
+  9, 10, 80, "a"
+)
+
+```
+
+---
+
+#Basic Plot
+
+* First let's make a simple scatter plot of A versus C
+
+```{r, fig.width = 6, fig.height = 4}
+ggplot(data=data, mapping=aes(x=A, y=C, shape=D))+
+  geom_point()
+```
+
+---
+
+#Basic Plot 
+
+- Notice, `ggplot` mapped "a" to a circle and "b" to a triangle. This transformation is the responsibility of **scales**. So if you want the mapping to be different, specify a different scale.
+
+- We can create lots of different types of plots using this same basic specification. For example, if we drew lines instead of points, we would get a line plot. 
+
+- Or, if we used bars, we would get a bar plot. Bars, lines, and points are all examples of **geometric objects**, `geom` for short. 
+
+- `ggplot2` has a [ton of options for geoms](https://ggplot2.tidyverse.org/reference/), but we'll be using `geom_point`, `geom_line`, `geom_bar`, etc.
+
+---
+
+#Line Example
+
+```{r, fig.width = 6, fig.height = 4}
+ggplot(data=data, mapping=aes(x=A, y=C))+
+  geom_line()
+```
+
+---
+# Line Example 
+
+- We can still separate by column D in a line plot
+
+--
+
+```{r, fig.width = 6, fig.height = 4}
+ggplot(data=data, mapping=aes(x=A, y=C, color=D))+
+  geom_line()
+```
+---
+
+#Line Example
+
+- These lines are a little thin. Let's make them bolder 
+
+--
+
+
+
+```{r, fig.width = 6, fig.height = 4}
+ggplot(data=data, mapping=aes(x=A, y=C, color = D))+
+  geom_line(size = 3)
+```
+
+---
+
+#Line Example
+
+- I don't like the background. Let's change the theme.
+
+--
+
+```{r, fig.width = 6, fig.height = 4}
+ggplot(data=data, mapping=aes(x=A, y=C, color = D))+
+  geom_line(size = 3)+
+  theme_minimal()
+```
+
+---
+#Line Example
+
+- Finally, let's add some labels
+
+--
+
+```{r, fig.width = 5.5, fig.height = 3.5}
+ggplot(data=data, mapping=aes(x=A, y=C, color = D))+
+  geom_line(size = 3)+
+  theme_minimal()+
+  ggtitle("A Plot of Made up Data")
+```
+
+---
+
+#Faceting
+
+- Sometimes we may want to display multiple charts with similar data. 
+
+-- 
+
+- For this we can use faceting
+
+-- 
+
+- This is especially useful whenever the Y-axis is the same. 
+
+---
+
+#Faceting
+
+Faceting your plot into groups specified by D. 
+
+Each value of D (a or b) will be displayed on a different panel.
+
+```{r ggplot_facet, fig.width = 6, fig.height = 3.5}
+ggplot(data=data) + 
+  geom_point(mapping = aes(x = A, y = C, shape = D)) + 
+  facet_wrap(~D)
+```
+
+---
+#More Plots
+
+- Now let's use `gapminder` to make some more informative plots
+
+- Suppose we are interested in the relationship between GDP per capita and life expectancy
+
+- First, we should use `mutate` from last week to get log GDP per capita
+
+```{r}
+gapminder <- gapminder %>% mutate(
+  loggdp = log(gdpPercap)
+)
+```
+
+---
+#More Plots
+
+- now we can make a scatter plot
+
+```{r, , fig.width = 6, fig.height = 3.5}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point()
+```
+
+---
+#Faceting again
+
+- Let's separate this by continent
+
+```{r, , fig.width = 6, fig.height = 3.5}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point()+
+  facet_wrap(~continent)
+```
+
+---
+
+#More Plots
+
+- Now let's separate by continent but on the same graph
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp, color=continent))+
+  geom_point()
+```
+
+---
+
+#Layering Graphs
+
+- Suppose we want to add a line to our plot
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point()+
+  geom_smooth()
+```
+
+---
+#Density Plots
+
+- You might also be interested in the distribution of a variable. Let's do a density plot of Life Expectancy.
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=lifeExp))+
+  geom_density()
+```
+
+
+---
+
+#Density Plots
+
+- Now lets separate the variable by continent.
+
+--
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=lifeExp, fill=continent))+
+  geom_density()
+```
+
+---
+
+#Histograms
+
+- Let's make a histogram of log GDP per Capita on top of our density plot
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=loggdp, fill=continent))+
+  geom_histogram(bins = 100)
+```
+
+
+---
+
+layout:true
+
+#More Fun with GGPlot2
+
+---
+
+### 1. Manually set colors
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point(color="pink")
+```
+
+
+---
+
+### 2. Change size and Shape of Points
+
+```{r, , fig.width = 7, fig.height = 4}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point(color="pink", size = 0.5, shape="triangle")
+```
+
+---
+
+### 3. Change Transpancy 
+
+- Very helpful for density plots
+
+```{r, , fig.width = 6, fig.height = 3.5}
+ggplot(data=gapminder, aes(x=lifeExp, fill=continent))+
+  geom_density(alpha = 0.5)
+```
+
+---
+
+### 3. Change Transpancy 
+
+- Very helpful for layering
+
+```{r, , fig.width = 6, fig.height = 3.5}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point(shape="triangle", alpha = 0.5) + 
+  geom_smooth()
+```
+
+---
+
+### 4. Vary Point Size
+
+```{r, , fig.width = 7, fig.height = 3.5}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point(aes(color=continent, size=pop)) 
+```
+
+---
+
+```{r, , fig.width = 7, fig.height = 3}
+ggplot(data=gapminder, aes(x=loggdp, y=lifeExp))+
+  geom_point(aes(color = continent, size = pop), alpha=0.5)+
+  scale_size_continuous(labels = scales::unit_format(unit="M", scale=1e-6))+
+  xlab("Log, GDP per Capita")+ ylab("Life Expectancy")+
+  labs(size="Population", colour="Continent")
+```
+
+---
+layout:false
+
+# Tools for Using ggplot2
+
+* [A Layered Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.pdf) 
+
+* [R4DS](https://r4ds.had.co.nz/data-visualisation.html)
+
+* [Datacamp](https://learn.datacamp.com/courses/data-visualization-with-ggplot2-1)
+
+* [R Graph Gallery](https://www.r-graph-gallery.com/index.html)
+
+---
+
+#Final Thoughts
+
+* There are so many more thing you can create using ggplot2
+
+* Start with simple graphs and then work your way up to more sophisticated ones
+
+* Don' forget to use help in .mono[R] to know what can go into each different `geom` function
+
+
+
+
+
+
+
+
