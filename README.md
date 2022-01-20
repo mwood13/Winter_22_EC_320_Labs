@@ -52,7 +52,7 @@ This weeks slides are courtesy of Philip
 
 **Content:**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) | 
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%203.Rmd)
 
 
 ## Week 4: Regression Analysis & Hypothesis Testing
