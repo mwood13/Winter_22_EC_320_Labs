@@ -66,7 +66,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | 
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | [Slides.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Slides.Rmd) | 
 
 
 ## Week 5: No Lab
