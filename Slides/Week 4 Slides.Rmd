@@ -1,0 +1,398 @@
+---
+title: "Week 4 Lab"
+subtitle: "Regression using OLS"
+author: "Micaela Wood"
+date: "01/27/2022"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{R, setup, include = F}
+# devtools::install_github("dill/emoGG")
+library(pacman)
+p_load(
+  broom, tidyverse,
+  latex2exp, ggplot2, ggthemes, ggforce, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor,
+  data.table, dplyr, estimatr,
+  lubridate, knitr, parallel,
+  lfe,
+  here, magrittr
+)
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+slate <- "#314f4f"
+# Dark slate grey: #314f4f
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+options(crayon.enabled = F)
+options(knitr.table.format = "html")
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 18, family = "STIXGeneral"),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_void() + theme(
+  text = element_text(family = "Fira Sans Book"),
+  axis.title = element_text(size = 18),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = grey_light,
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_set(theme_gray(base_size = 20))
+# Column names for regression results
+reg_columns <- c("Term", "Est.", "S.E.", "t stat.", "p-Value")
+# Function for formatting p values
+format_pvi <- function(pv) {
+  return(ifelse(
+    pv < 0.0001,
+    "<0.0001",
+    round(pv, 4) %>% format(scientific = F)
+  ))
+}
+format_pv <- function(pvs) lapply(X = pvs, FUN = format_pvi) %>% unlist()
+# Tidy regression results table
+tidy_table <- function(x, terms, highlight_row = 1, highlight_color = "black", highlight_bold = T, digits = c(NA, 3, 3, 2, 5), title = NULL) {
+  x %>%
+    tidy() %>%
+    select(1:5) %>%
+    mutate(
+      term = terms,
+      p.value = p.value %>% format_pv()
+    ) %>%
+    kable(
+      col.names = reg_columns,
+      escape = F,
+      digits = digits,
+      caption = title
+    ) %>%
+    kable_styling(font_size = 20) %>%
+    row_spec(1:nrow(tidy(x)), background = "white") %>%
+    row_spec(highlight_row, bold = highlight_bold, color = highlight_color)
+}
+```
+
+```{css, echo = F, eval = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+#Today
+
+- Learn to compute OLS Manually
+- Learn to use `lm`
+- Learn how to read output from `lm`
+
+---
+
+layout:true
+
+#Manual OLS
+
+---
+
+First we will need some data
+
+--
+
+```{r data for OLS}
+set.seed(1)
+
+ols.data <- tibble(
+  x = runif(100, 0, 10),
+  e = rnorm(100, 0, 15),
+  y = 5 + 3*x + e
+)
+
+head(ols.data)
+
+```
+
+---
+
+A good place to start is with visualization. 
+
+--
+
+```{r visualize data, fig.height=4, fig.width=6}
+ggplot(ols.data, aes(x = x, y = y))+
+  geom_point()
+```
+
+---
+
+- Now suppose we did not create this data on our own. 
+
+--
+
+- Typically we will not know how our data is generated so we use OLS to estimate the relationship
+
+--
+
+The equations we need to calculate our estimates are
+
+$\hat \beta_2 = \frac{\sum_{i=1}^n (Y_i - \bar Y)(X_i - \bar X)}{\sum_{i=1}^n (X_i - \bar X)^2}$
+
+$\hat \beta_1 = \bar Y - \hat \beta_2 * \bar X$
+
+---
+
+First we should solve for $\hat \beta_2$ 
+
+```{r solve for slope}
+#firt find the differences between the variable and its mean
+ols.data <- ols.data %>% mutate(
+  y.err = y - mean(y), 
+  x.err = x - mean(x)
+)
+
+#second you need to square the differences in the x's
+ols.data <- ols.data %>% mutate(
+  x.err.sq = x.err^2
+)
+
+#third we need the covariance of y and x
+ols.data <- ols.data %>% mutate(
+  cov.xy = y.err * x.err
+)
+```
+
+---
+
+```{r}
+#now sum over the x squared error and x, y covariance
+cov.sum <- sum(ols.data$cov.xy)
+x.err.sq.sum <- sum(ols.data$x.err.sq)
+
+#Finally divide to get b2
+b2 <- cov.sum/x.err.sq.sum
+b2
+```
+
+---
+
+```{r}
+b2
+```
+
+--
+
+Notice that this isn't quite 3 but pretty close. 
+
+--
+
+That is because we only have 100 observation but have a lot of variance.
+
+--
+
+If we increased the number of observations, the estimate would get closer to 3. 
+
+---
+
+Now lets calculate the intercept also known as $\hat\beta_1$.
+
+--
+
+Because we already have .hi[b2] we just plug it in to the formula along with the means of .hi[Y] and .hi[X].
+
+--
+
+```{r}
+b1 = mean(ols.data$y) - b2 * mean(ols.data$x)
+b1
+```
+
+---
+
+Now we can redo the scatterplot and add the regression line using `geom_abline`
+
+--
+
+```{r plot with estimated coefficients, fig.height=4, fig.width=6}
+ggplot(ols.data, aes(x = x, y = y))+
+  geom_point()+
+  geom_abline(slope = b2, intercept = b1)
+```
+
+
+---
+
+What if we want to include control variables?
+
+--
+
+Then this requires matrix algebra.
+
+--
+
+Another option is to use `lm`
+
+---
+
+layout:true
+
+# OLS using lm
+
+---
+
+Let's start with an simple regression
+
+```{r}
+lm1 <- lm(data = ols.data, y~x)
+```
+
+---
+
+* lm saves as a list of 12 different items. 
+
+* This allows you to call elements of the list in later code
+
+--
+
+```{r}
+lm1$coefficients
+```
+
+---
+
+* You can also view parts of the list all at once using `summary`
+
+--
+
+```{r}
+summary(lm1)
+```
+
+---
+
+Now lets create a new data where y is explained by more than one variable.
+
+```{r}
+n = 100
+set.seed(1)
+
+dgp_df <- tibble(
+  e = rnorm(n, sd = 30),
+  x = runif(n, min = 0, max = 10),
+  z = runif(n, min = 5, max = 15),
+  y = 5 + 3*x + 4*z + e
+)
+
+head(dgp_df)
+```
+
+---
+
+First let's do a regression with just x and y
+
+--
+
+```{r ols with controls}
+lm2a <- lm(data = dgp_df, y ~ x)
+```
+
+
+---
+
+```{r}
+summary(lm2a)
+```
+
+---
+
+Now let's add the second variable and see how our results change.
+
+```{r}
+lm2b <- lm(data = dgp_df, y ~ x + z)
+```
+
+---
+
+```{r}
+summary(lm2b)
+```
+
+
+
+
+
+
