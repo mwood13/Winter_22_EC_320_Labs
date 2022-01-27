@@ -50,12 +50,24 @@ This weeks slides are courtesy of Philip
 
 ## Week 3: Visualization using `ggplot2`
 
+1. Creating Line, Density, and Scatterplots
+2. Faceting
+3. Layering Plots
+
 **Content:**
 
 [.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%203.Rmd)
 
 
-## Week 4: Regression Analysis & Hypothesis Testing
+## Week 4: Regression Analysis
+
+1. Manual OLS
+2. OLS with `lm`
+
+**Content**
+
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | 
+
 
 ## Week 5: No Lab
 
