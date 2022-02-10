@@ -73,6 +73,14 @@ This weeks slides are courtesy of Philip
 
 ## Week 6: Hypothesis Testing & Confidence Intervals
 
+1. Manually Calculate Confidence Intervals
+2. Graph Confidence Intervals
+3. Manually Conducting Hypothesis Tests
+4. Using `ifelse` statements
+
+[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8037856/Week.6.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%206%20Slides.Rmd)
+
+
 ## Week 7: Omitted Variable Bias Simulation
 
 ## Week 8: Maps with `ggplot2`
