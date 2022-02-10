@@ -1,0 +1,806 @@
+---
+title: "Week 6 Lab"
+subtitle: "Confidence Intervals and Hypothesis Testing"
+author: "Micaela Wood"
+date: "02/10/2022"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{R, setup, include = F}
+# devtools::install_github("dill/emoGG")
+library(pacman)
+p_load(
+  broom, tidyverse,
+  latex2exp, ggplot2, ggthemes, ggforce, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor,
+  data.table, dplyr, estimatr,
+  lubridate, knitr, parallel,
+  lfe,
+  here, magrittr
+)
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+slate <- "#314f4f"
+# Dark slate grey: #314f4f
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+options(crayon.enabled = F)
+options(knitr.table.format = "html")
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 18, family = "STIXGeneral"),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_void() + theme(
+  text = element_text(family = "Fira Sans Book"),
+  axis.title = element_text(size = 18),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = grey_light,
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_set(theme_gray(base_size = 20))
+# Column names for regression results
+reg_columns <- c("Term", "Est.", "S.E.", "t stat.", "p-Value")
+# Function for formatting p values
+format_pvi <- function(pv) {
+  return(ifelse(
+    pv < 0.0001,
+    "<0.0001",
+    round(pv, 4) %>% format(scientific = F)
+  ))
+}
+format_pv <- function(pvs) lapply(X = pvs, FUN = format_pvi) %>% unlist()
+# Tidy regression results table
+tidy_table <- function(x, terms, highlight_row = 1, highlight_color = "black", highlight_bold = T, digits = c(NA, 3, 3, 2, 5), title = NULL) {
+  x %>%
+    tidy() %>%
+    select(1:5) %>%
+    mutate(
+      term = terms,
+      p.value = p.value %>% format_pv()
+    ) %>%
+    kable(
+      col.names = reg_columns,
+      escape = F,
+      digits = digits,
+      caption = title
+    ) %>%
+    kable_styling(font_size = 20) %>%
+    row_spec(1:nrow(tidy(x)), background = "white") %>%
+    row_spec(highlight_row, bold = highlight_bold, color = highlight_color)
+}
+```
+
+```{css, echo = F, eval = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+#Today
+
+- Review from first half of course
+
+- Learn how to manually create, plot, and interpret .green[confidence intervals]
+
+- Learn how to conduct .purple[hypothesis tests] and use .hi[if] statements
+
+---
+
+#Review
+
+- how to use the mutate function
+
+- how to plot from separate data frames
+
+- how to plot using functions 
+
+---
+
+layout:true
+
+#Mutate
+
+---
+
+For this part I will be going through question 1 from the second homework set
+
+```{r}
+library(tidyverse)
+
+n <- 100
+set.seed(12345)
+# Generate data in a tibble
+data = tibble(
+  e = rnorm(n, sd = 30),
+  v = rnorm(n, sd = 20),
+  x = runif(n, min = 0, max = 10),
+  y = 8 - 3*x + e,
+  z = 20 - 2*y + v,
+)
+```
+
+---
+
+For this problem we needed to create standardized versions of the variables
+
+--
+
+```{}
+data_std <- data %>% mutate(
+  ??? = ???,
+  ??? = ???
+)
+```
+
+---
+
+For this problem we needed to create standardized versions of the variables
+
+```{r}
+data_std <- data %>% mutate(
+  x.std = (x - mean(x))/sd(x),
+  y.std = (y - mean(y))/sd(y)
+)
+```
+
+---
+
+Another Option
+
+```{}
+x_mu = mean(data$x)
+y_mu = mean(data$y)
+
+x_sd = std(data$x)
+y_sd = std(data$y)
+
+data_std <- data %>% mutate(
+  x.std = (x - x_mu)/x_sd,
+  y.std = (y - y_mu)/y_sd
+)
+```
+
+---
+
+layout:true
+
+#Plots from different dataframes
+
+---
+
+For the last part of this problem we needed to make density plots of the regular and standardized x's
+
+--
+
+First let's just plot one density plot
+
+--
+
+```{}
+ggplot()+ 
+  ???(data = ???, aes(??? = ???))
+```
+
+---
+
+```{r, fig.height=6}
+ggplot()+ 
+  geom_density(data = data, aes(x = x))
+```
+
+---
+
+Now we can try to make a second plot on top of the first
+
+--
+
+```{}
+ggplot()+ 
+  geom_density(data = data, aes(x = x))+
+  ???(data = ???, aes(x = ???))
+```
+
+---
+
+I will also add some color to this one
+
+```{r, fig.height=5}
+ggplot()+ 
+  geom_density(data = data, aes(x = x), color = "blue")+
+  geom_density(data = data_std, aes(x = x.std), color = "red")
+```
+
+---
+
+layout:true
+
+#Plots of conditional means
+
+---
+
+Now I will go over the Plot from Question 1 on homework 3
+
+--
+
+I will first load the data
+
+```{r}
+nlsy79 <- read_csv("nlsy79.csv")
+```
+
+---
+
+There are 2 ways to get the desired outcome:
+
+  1. Create a data frame that is grouped by years of schooling
+  
+  2. Put a function inside of ggplot
+  
+---
+
+
+1. Create a data frame that is grouped by years of schooling
+
+
+```{r}
+nlsy79_summ <- nlsy79 %>% group_by(hgc) %>%
+  summarize(mean_earn = mean(earn2009, na.rm=TRUE)) %>%
+  filter(is.na(hgc)==0)
+
+head(nlsy79_summ)
+```
+
+---
+
+There are three functions here that we may not be familiar with
+
+  - `group_by()`: 
+      - This tells R how we want the data set to be grouped
+      - Because we wanted means conditional on year of schooling we did `group_by(hgc)`
+  
+  - `summarize`:
+      - This is similar to mutate
+      - It creates variables for our grouped data frame
+  
+  - `filter`: 
+      - We have used this before but not often
+      - Here we are getting rid of observations that did not report their schooling
+      
+
+---
+
+Now that we have a grouped data frame we can make a plot.
+
+```{} 
+ggplot(data = ???) +
+  geom_point(aes(x = ???, y = ???))+
+  ylab("???") +
+  xlab("???") +
+  theme_bw()
+```
+
+---
+
+```{r, fig.height=5}
+ggplot(nlsy79_summ) +
+  geom_point(aes(hgc, mean_earn))+
+  ylab("Average Earnings") +
+  xlab("Years of Education") +
+  theme_bw()
+```
+
+---
+
+ 2. Put a function inside ggplot
+
+  - Don't forget we can use `help` for new functions
+  
+```{}
+ggplot(data = ??? ,aes(x=???,y=???)) +
+  stat_summary(fun = "???", geom = "???")+
+  xlab("Years of Education") + ylab("Average Earnings") +
+  theme_bw()
+```
+
+--
+
+  - `stat_summary` allows us to summarise y based on groups of x
+  - `fun =` is how we want the y value summarized. 
+  - `geom = ` gives us the style of graph that we want.
+
+---
+
+```{r, fig.height=5}
+ggplot(nlsy79,aes(x=hgc,y=earn2009)) +
+  stat_summary(fun = "mean", geom = "point")+
+  xlab("Years of Education") + ylab("Average Earnings") +
+  theme_bw()
+```
+
+---
+
+layout:false
+
+class:inverse,middle,center
+
+#Questions?
+
+---
+
+layout:true
+
+#Confidence Intervals
+
+---
+
+### Things we need to calculate .green[confidence intervals]
+
+--
+
+  - Estimate of $\hat\beta_2$
+  
+  - Estimate of Standard Errors
+  
+  - t Statistic
+  
+--
+  
+### With these we can calculate...
+
+--
+  
+  - Upper confidence bound
+  
+  - Lower confidence bound
+  
+---
+
+### We can get everything we need to calculate a confidence interval from our regression output
+
+--
+
+For this I will use the data from homework 3
+
+```{r}
+n <- 1000
+set.seed(1245)
+
+data_sim = tibble(
+  e = rnorm(n, sd = 30),
+  v = rnorm(n, sd = 20),
+  x = runif(n, min = 0, max = 10),
+  y = 8 - 3*x + e,
+  z = 20 - 0.3*y + 3*x + v
+)
+```
+
+---
+
+Let's run the regressions from that homework
+
+--
+
+```{}
+lm1 <- lm(data = ???, ???)
+lm2 <- lm(data = ???, ???)
+```
+
+---
+
+Let's run the regressions from that homework
+
+```{r}
+lm1 <- lm(data = data_sim, z~y)
+lm2 <- lm(data = data_sim, z~y+x)
+
+```
+
+---
+
+We can save these results from the regression in an easy to use manner with `tidy()`
+
+```{}
+results <- rbind(tidy(???), tidy(???)) %>% filter(term =="???")
+
+results
+```
+
+
+---
+
+We can save these results from the regression in an easy to use manner with `tidy()`
+
+```{r}
+results <- rbind(tidy(lm1), tidy(lm2)) %>% filter(term =="y")
+
+results
+```
+
+--
+
+Notice that this is a dataframe with columns for our estimate and standard errors
+
+---
+
+Now we can use `mutate` to create variables for our confidence interval
+
+```{}
+results <- results %>% mutate(
+  upper_bound = ???,
+  lower_bound = ???,
+  model = c("???", "???")
+)
+```
+
+---
+
+Now we can use `mutate` to create variables for our confidence interval
+
+```{r}
+results <- results %>% mutate(
+  lower_bound = estimate - 1.96*std.error,
+  upper_bound = estimate + 1.96*std.error,
+  model = c("without x", "with x")
+)
+
+results
+```
+
+---
+
+We may also be interested in plotting our confidence intervals
+
+--
+
+To do this we can use `geom_errorbar`
+
+--
+
+`geom_errorbar` requires a ymax and ymin.
+  
+  - These are the upper and lower bounds for our confidence intervals
+  
+---
+
+```{}
+ggplot(data = ???, aes(x=???, y=???))+
+  geom_errorbar(aes(ymin=???, ymax=???))+
+  geom_hline(yintercept=???)+
+  theme_bw()
+```
+
+---
+
+```{r, fig.height=5}
+ggplot(data = results, aes(x=model, y=estimate))+
+  geom_errorbar(aes(ymin=lower_bound, ymax=upper_bound))+
+  geom_hline(yintercept=-0.3)+
+  theme_bw()
+```
+
+---
+
+layout:true
+
+#Hypothesis Testing
+
+---
+
+For Hypothesis Testing we can use the same results data frame
+
+```{r}
+results
+```
+
+--
+
+With this information we will can create a test statistic
+
+---
+
+The test we will conduct is:
+
+$H_o: \beta = -0.3$
+
+$H_a: \beta \neq -0.3$
+
+---
+
+To create our test statistic I am going to pull the data out of the data frame. 
+
+--
+
+First I will test the model without x
+
+--
+
+```{}
+#pull out beta
+beta1 = results$???[???]
+
+#pull out standard error
+st.err1 = results$???[???]
+```
+
+---
+
+To create our test statistic I am going to pull the data out of the data frame. 
+
+
+
+First I will test the model without x
+
+
+
+```{r}
+#pull out beta
+beta1 = results$estimate[1]
+
+#pull out standard error
+st.err1 = results$std.error[1]
+
+```
+
+---
+
+The test we will conduct is:
+
+$H_o: \beta = -0.3$
+
+$H_a: \beta \neq -0.3$
+
+Now I will create the test statistic
+
+```{}
+test1 = (??? - ???)/???
+```
+
+---
+
+The test we will conduct is:
+
+$H_o: \beta = -0.3$
+
+$H_a: \beta \neq -0.3$
+
+Now I will create the test statistic
+
+```{r}
+test1 = (beta1 - (-0.3))/st.err1
+test1
+```
+
+--
+
+Do we reject or fail to reject the null hypothesis?
+
+--
+
+|-2.425| > 1.96 so .hi[reject] the null hypothesis
+
+---
+
+Now lets repeat this for the model with x
+
+--
+
+Let's pull the numbers we need from this model 
+
+```{}
+#pull out beta
+beta2 = results$estimate[???]
+
+#pull out standard error
+st.err2 = results$std.error[???]
+
+```
+
+---
+
+Now lets repeat this for the model with x
+
+
+
+Let's pull the numbers we need from this model 
+
+```{r}
+#pull out beta
+beta2 = results$estimate[2]
+
+#pull out standard error
+st.err2 = results$std.error[2]
+
+```
+
+---
+
+Now we repeat the hypothesis test
+
+
+--
+
+$H_o: \beta = -0.3$
+
+$H_a: \beta \neq -0.3$
+
+I will create the new test statistic
+
+--
+
+```{r}
+test2 = (beta2 - (-0.3))/st.err2
+test2
+```
+
+--
+
+Do we reject or fail to reject the null hypothesis?
+
+--
+
+|1.27| < 1.96 so .hi[fail to reject] the null 
+
+---
+
+layout:false
+
+class:inverse,center,middle
+
+#Bonus
+
+---
+
+layout:true
+
+#If Statements
+
+---
+
+- We can create an `if` statement to print out the results of our hypothesis tests
+
+- I prefer to use `ifelse` 
+
+--
+
+```{}
+ifelse(test, if true, if false)
+```
+
+---
+
+Lets start with a simple example. 
+
+```{}
+ifelse(test, if true, if false)
+```
+
+```{r}
+ifelse(2 + 2 == 4, "This is True", "This is False")
+```
+
+--
+
+```{r}
+ifelse(2 + 2 > 5, "This is True", "This is False")
+```
+
+---
+
+Let's try to make one for our first Hypothesis tests
+
+```{}
+ifelse(test, if true, if false)
+```
+
+--
+
+```{r}
+ifelse(abs(test1) > 1.96, 
+       "Reject the null hypothesis",
+       "Fail to reject the null hypothesis")
+```
+
+---
+
+Now we can do the same thing for the second test
+
+```{}
+ifelse(test, if true, if false)
+```
+
+--
+
+```{r}
+ifelse(abs(test2) > 1.96, 
+       "Reject the null hypothesis",
+       "Fail to reject the null hypothesis")
+```
+
+---
+
+layout:false
+
+class:inverse,middle,center
+
+#Questions?
+
