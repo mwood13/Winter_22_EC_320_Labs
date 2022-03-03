@@ -30,9 +30,9 @@ Slides will be posted after class. Use these resources to recap over what has be
 3. Markdown files and knitting. 
 4. How to use Tex language for writing in markdown. 
 
-**Content:**
+**Content**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7824036/Week.1.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%201.Rmd)
+[Week 1 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7824036/Week.1.Lab.pdf) 
 
 ## Week 2: Data wrangling using `tidyverse`
 
@@ -41,9 +41,9 @@ Slides will be posted after class. Use these resources to recap over what has be
 3. Cleaning data with `tidyr`
 4. Manipulating data with `dplyr`
 
-**Content:**
+**Content**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%202.Rmd)
+[Week 2 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) 
 
 This weeks slides are courtesy of Philip
 
@@ -54,10 +54,9 @@ This weeks slides are courtesy of Philip
 2. Faceting
 3. Layering Plots
 
-**Content:**
+**Content**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%203.Rmd)
-
+[Week 3 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) 
 
 ## Week 4: Regression Analysis
 
@@ -66,7 +65,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | [Slides.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Slides.Rmd) | [Example Markdown](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Code.Rmd)
+[Week 4 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | [Example Markdown](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Code.Rmd)
 
 
 ## Week 5: No Lab
@@ -78,14 +77,43 @@ This weeks slides are courtesy of Philip
 3. Manually Conducting Hypothesis Tests
 4. Using `ifelse` statements
 
-[.pdf](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8037856/Week.6.Lab.pdf) | [.Rmd](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%206%20Slides.Rmd)
+**Content**
 
+[Week 6 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8037856/Week.6.Lab.pdf) 
 
 ## Week 7: Omitted Variable Bias Simulation
 
-## Week 8: Maps with `ggplot2`
+1. How to identify Omitted Variables
+2. How to identify Irrelevent Valiables
+3. F-Tests 
+4. Intro to Iterated Simulations
+
+**Content**
+
+[Week 7 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181550/Week.7.Lab.pdf)
+
+
+## Week 8: Maps, Functions, and Loops
+
+1. Visualizing Spacial Data
+2. Intro to Function Writing
+3. Intro to Loops
+
+**Content**
+
+[Week 8 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181553/Week.8.Lab.pdf)
+
 
 ## Week 9: Interaction Terms and Non-Linear Relationships
+
+1. Log-Linear Regressions and Interpretations
+2. Quadratic Relations 
+3. Interaction Variables and Marginal Effects
+
+**Content**
+
+[Week 9 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181563/Week.9.Lab.pdf)
+
 
 ## Week 10: Heteroskedasticity and Autocorrelation
 
