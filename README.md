@@ -32,7 +32,7 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content**
 
-[Week 1 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7824036/Week.1.Lab.pdf) 
+[Week 1 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%201%20Lab.pdf) 
 
 ## Week 2: Data wrangling using `tidyverse`
 
@@ -43,7 +43,7 @@ Slides will be posted after class. Use these resources to recap over what has be
 
 **Content**
 
-[Week 2 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7835784/Week.2.Lab.pdf) 
+[Week 2 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%202%20Lab.pdf) 
 
 This weeks slides are courtesy of Philip
 
@@ -56,7 +56,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 3 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7907453/Week.3.Lab.pdf) 
+[Week 3 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%203%20Lab.pdf) 
 
 ## Week 4: Regression Analysis
 
@@ -65,7 +65,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 4 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/7954506/Week.4.Lab.pdf) | [Example Markdown](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Code.Rmd)
+[Week 4 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%204%20Lab.pdf) | [Using Stargazer](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Stargazer.pdf)
 
 
 ## Week 5: No Lab
@@ -79,7 +79,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 6 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8037856/Week.6.Lab.pdf) 
+[Week 6 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%206%20Lab.pdf) 
 
 ## Week 7: Omitted Variable Bias Simulation
 
@@ -90,7 +90,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 7 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181550/Week.7.Lab.pdf)
+[Week 7 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%207%20Lab.pdf)
 
 
 ## Week 8: Maps, Functions, and Loops
@@ -101,7 +101,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 8 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181553/Week.8.Lab.pdf)
+[Week 8 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%208%20Lab.pdf)
 
 
 ## Week 9: Interaction Terms and Non-Linear Relationships
@@ -112,7 +112,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[Week 9 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/files/8181563/Week.9.Lab.pdf)
+[Week 9 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%209%20Lab.pdf)
 
 
 ## Week 10: Heteroskedasticity and Autocorrelation
@@ -124,7 +124,7 @@ This weeks slides are courtesy of Philip
 
 **Content**
 
-[week 10 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%2010%20Lab.pdf)
+[Week 10 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%2010%20Lab.pdf)
 
 
 ### Thanks
