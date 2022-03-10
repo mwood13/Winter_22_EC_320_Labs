@@ -117,6 +117,14 @@ This weeks slides are courtesy of Philip
 
 ## Week 10: Heteroskedasticity and Autocorrelation
 
+1. Goldfeld-Quant Test
+2. Breusch-Pagan Test
+3. White Test
+4. Correcting for Clustered Standard Errors
+
+**Content**
+
+[week 10 Slides](https://github.com/mwood13/Winter_22_EC_320_Labs/blob/main/Slides/Week%2010%20Lab.pdf)
 
 
 ### Thanks
